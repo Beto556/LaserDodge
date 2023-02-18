@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Nick Game.unity
+    guid: f65a9a67f6cbf4742a657d66f3d2a79b
   m_configObjects: {}
