@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
+using UnityEngine.UI;
+using TMPro;
 
 public class Controls : MonoBehaviour
 {
@@ -18,7 +21,7 @@ public class Controls : MonoBehaviour
     public Camera mainCam;
 
     //Game Settings
-    private int currentHP;
+    private int currentHP = 5;
     private int playerPlacement;
     private float iFrames;
     private float score;
@@ -31,11 +34,18 @@ public class Controls : MonoBehaviour
     private GameObject[] activeProjectiles;
     private GameObject[] activeCollectibles;
     private float timer;
+    public AudioSource playerAudio;
+    public AudioClip playerJump;
+    public AudioClip enemyShoot;
+    public AudioClip playerHit;
+    public TextMeshProUGUI scoreUI;
+    public TextMeshProUGUI healthUI;
 
     //GameManager Menus
     public GameObject menuPause;
     public GameObject menuTitle;
     public GameObject menuFail;
+    public GameObject menuGame;
     public bool paused;
     private bool mainMenu;
     private bool gameOver;
@@ -43,7 +53,7 @@ public class Controls : MonoBehaviour
     void Start()
     {
         Booleans(true, false, false);
-        Reset();
+        playerAudio = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -52,6 +62,7 @@ public class Controls : MonoBehaviour
         menuTitle.SetActive(mainMenu);
         menuPause.SetActive(paused && !gameOver);
         menuFail.SetActive(gameOver);
+        menuGame.SetActive(!mainMenu && !paused && !gameOver);
 
         //Died
         if (currentHP == 0) {
@@ -82,6 +93,7 @@ public class Controls : MonoBehaviour
             //Fire projectiles
             if (timer / fireEveryXSeconds >= 1) {
                 Instantiate(attackPrefabs[Random.Range(0, attackPrefabs.Length)], attackSpawnPositions[Random.Range(0, attackSpawnPositions.Length)].position, Quaternion.identity);
+                playerAudio.PlayOneShot(enemyShoot, 1f);
                 timer = 0;
             }
 
@@ -97,6 +109,8 @@ public class Controls : MonoBehaviour
             score += Time.deltaTime;
             timer += Time.deltaTime;
         }
+        scoreUI.text = "Score: " + score.ToString("0.0");
+        healthUI.text = "Lives: " + currentHP.ToString();
     }
 
     //Set desired booleans
@@ -119,6 +133,7 @@ public class Controls : MonoBehaviour
     //Add upward force and assign target location to move to
     private void Forces()
     {
+        playerAudio.PlayOneShot(playerJump, 1f);
         heightTarget = jumpHeight;
         targetPosition = (playerPlacement - 1) * platformSpacing;
     }
@@ -142,6 +157,9 @@ public class Controls : MonoBehaviour
         if (hit.CompareTag("Damage") && iFrames == 0) {
             currentHP = Mathf.Clamp(currentHP - 1, 0, maxHitpoints);
             iFrames = iFrameTime;
+            playerAudio.PlayOneShot(playerHit, 0.5f);
+            
+
         } else if (hit.CompareTag("Heal")) {
             currentHP = Mathf.Clamp(currentHP + 1, 0, maxHitpoints);
         }
@@ -178,4 +196,10 @@ public class Controls : MonoBehaviour
     {
         Booleans(false, onOff, false);
     }
+
+    public void quitGame()
+    {
+        Application.Quit();
+    }
+
 }
